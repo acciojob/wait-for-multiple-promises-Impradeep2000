@@ -1,39 +1,51 @@
-//your JS code here. If required.
-function wait(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function updateRow(row, name, time) {
-    const cells = row.cells;
-    cells[0].textContent = name;
-    cells[1].textContent = time.toFixed(3);
+function populateTable(data) {
+  const table = document.getElementById('resultTable');
+  const loadingRow = document.getElementById('loadingRow');
+  table.removeChild(loadingRow);
+
+  data.forEach((item, index) => {
+    const newRow = table.insertRow();
+    const promiseCell = newRow.insertCell(0);
+    const timeCell = newRow.insertCell(1);
+
+    promiseCell.textContent = `Promise ${index + 1}`;
+    timeCell.textContent = `${item.toFixed(3)}`;
+  });
 }
 
-const outputTable = document.getElementById('output');
+const promises = [];
 
-const loadingRow = outputTable.insertRow();
-const loadingCell = loadingRow.insertCell(0);
-loadingCell.colSpan = 2;
-loadingCell.textContent = 'Loading...';
+promises.push(
+  new Promise(resolve => {
+    const randomDelay = Math.random() * 2000 + 1000;
+    setTimeout(() => resolve(randomDelay / 1000), randomDelay);
+  })
+);
 
-const promises = [
-    wait(Math.random() * 2000 + 1000),
-    wait(Math.random() * 2000 + 1000),
-    wait(Math.random() * 2000 + 1000)
-];
+promises.push(
+  new Promise(resolve => {
+    const randomDelay = Math.random() * 2000 + 1000;
+    setTimeout(() => resolve(randomDelay / 1000), randomDelay);
+  })
+);
+
+promises.push(
+  new Promise(resolve => {
+    const randomDelay = Math.random() * 2000 + 1000;
+    setTimeout(() => resolve(randomDelay / 1000), randomDelay);
+  })
+);
 
 Promise.all(promises)
-    .then(times => {
-        outputTable.deleteRow(loadingRow.rowIndex);
-
-        const promiseNames = ['Promise 1', 'Promise 2', 'Promise 3'];
-        for (let i = 0; i < promises.length; i++) {
-            const newRow = outputTable.insertRow();
-            updateRow(newRow, promiseNames[i], times[i] / 1000);
-        }
-
-        const totalTime = times.reduce((acc, time) => acc + time, 0) / 1000;
-        const totalRow = outputTable.insertRow();
-        updateRow(totalRow, 'Total', totalTime);
-    })
-    .catch(error => console.error(error));
+  .then(data => {
+    const total = data.reduce((sum, time) => sum + time, 0);
+    data.push(total);
+    populateTable(data);
+  })
+  .catch(error => {
+    console.error(error);
+  });
